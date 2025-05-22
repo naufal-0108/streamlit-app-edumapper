@@ -1,9 +1,7 @@
-import os, logging
+import logging
 import streamlit as st
-import base64
 import time
 import pymongo as pm
-import streamlit_scrollable_textbox as stx
 from together import Together
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
