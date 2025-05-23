@@ -80,7 +80,7 @@ def agent_1(_client, kelas: str, mapel: str, topik: str, topik_details:str, styl
     3.  **Kondisi Verifikasi**:
         * **Jika `Topik Pembelajaran` TIDAK memenuhi kriteria di atas (misalnya, kosong, tidak jelas, atau tidak terstruktur), ATAU jika `Topik Details` disediakan NAMUN TIDAK memenuhi kriteria di atas (tidak jelas atau tidak terstruktur):**
             * **Hasilkan output HANYA pesan informasi berikut dalam Bahasa Indonesia dan JANGAN lanjutkan ke Tahap 2:**
-                "Informasi **Topik Pembelajaran** dan/atau **Detail Topik** yang Anda berikan belum cukup jelas atau strukturnya kurang baik. Mohon pastikan topik dan detailnya menggunakan kalimat yang runtut, mudah dipahami, dan memberikan informasi yang memadai. Silakan isi kembali."
+                "<generation_error>Informasi **Topik Pembelajaran** dan/atau **Detail Topik** yang Anda berikan belum cukup jelas atau strukturnya kurang baik. Mohon pastikan topik dan detailnya menggunakan kalimat yang runtut, mudah dipahami, dan memberikan informasi yang memadai. Silakan isi topik kembali.</generation_error>"
         * **Jika `Topik Pembelajaran` DAN `Topik Details` memenuhi kriteria di atas:**
             * Lanjutkan ke **Tahap 2: Pembuatan Rencana Pengajaran**.
 
@@ -455,25 +455,41 @@ def roadmap_fragment():
                         assert all([kelas, mapel, topik, style, style_details, waktu, pertemuan]), "All variables must be filled"
                         roadmap = agent_1(llm_client, kelas=kelas, mapel=mapel, topik=topik, topik_details="None", style=style,
                                           style_details=style_details, waktu=waktu, pertemuan=pertemuan, llm_params=llm_params, messages=[])
-                        st.session_state.state_gen = "second"
-                        st.session_state.roadmap_text = roadmap
-
                         progress_text = "Finished!"
                         progress_bar.progress(100, text=progress_text)
                         progress_bar.empty()
-                        st.divider()
-                        st.markdown('<div class="roadmap-text">Roadmap Pembelajaran</div>', unsafe_allow_html=True)
-                        st.divider()
-                        st.write(st.session_state.roadmap_text)
 
-                        cols = st.columns(2)
+                        st.session_state.roadmap_text = roadmap
 
-                        cols[0].button("Save", use_container_width=True, key="save_button", on_click=save_callback)
-                        cols[1].button("Regenerate", use_container_width=True, key="rev_button", on_click=rev_callback)
+                        if "<generation_error>" in roadmap:
+                            st.divider()
+                            st.markdown('<div class="roadmap-text">Roadmap Pembelajaran</div>', unsafe_allow_html=True)
+                            st.divider()
+                            st.write(st.session_state.roadmap_text)
+                            
+                            st.session_state.lock = False
+                            st.session_state.gen = False
+                            st.session_state.generate_roadmap = False
+                            st.session_state.gen_roadmap = False
+                            cols = st.columns(2)
+                            cols[0].button("Save", use_container_width=True, key="save_button", on_click=save_callback, disabled=True)
+                            cols[1].button("Regenerate", use_container_width=True, key="rev_button", on_click=rev_callback, disabled=True)
+                            st.rerun()
+                        else:
+                            st.session_state.state_gen = "second"
+                            st.divider()
+                            st.markdown('<div class="roadmap-text">Roadmap Pembelajaran</div>', unsafe_allow_html=True)
+                            st.divider()
+                            st.write(st.session_state.roadmap_text)
+
+                            cols = st.columns(2)
+
+                            cols[0].button("Save", use_container_width=True, key="save_button", on_click=save_callback)
+                            cols[1].button("Regenerate", use_container_width=True, key="rev_button", on_click=rev_callback)
 
 
                     else:
-
+                        
                         kelas = st.session_state.kelas_update
                         mapel = st.session_state.mapel_update
                         topik = st.session_state.topik_update
@@ -488,7 +504,7 @@ def roadmap_fragment():
                         time.sleep(1)
                         progress_text = "Fetching Topic Details..."
                         start += 15
-                        data = fetch_data(cursor, st.session_state.kelas, st.session_state.mapel, st.session_state.topik)
+                        data = fetch_data(cursor, kelas=kelas, mapel=mapel, topik=topik)
                         st.session_state.topik_details = data['ringkasan']
                         progress_bar.progress(start, text=progress_text)
 
@@ -521,7 +537,15 @@ def roadmap_fragment():
 
                         cols[0].button("Save", use_container_width=True, key="save_button", on_click=save_callback)
                         cols[1].button("Regenerate", use_container_width=True, key="rev_button", on_click=rev_callback)
- 
+            else:
+                st.divider()
+                st.markdown('<div class="roadmap-text">Roadmap Pembelajaran</div>', unsafe_allow_html=True)
+                st.divider()
+                st.write(st.session_state.roadmap_text)
+                cols = st.columns(2)
+                cols[0].button("Save", use_container_width=True, key="save_button", on_click=save_callback, disabled=True)
+                cols[1].button("Regenerate", use_container_width=True, key="rev_button", on_click=rev_callback, disabled=True)
+
         elif st.session_state.state_gen == "second":
             if st.session_state.gen_roadmap:
                 if st.session_state.rev_toggle_status:
@@ -615,7 +639,7 @@ def roadmap_fragment():
                         time.sleep(1)
                         progress_text = "Fetching Topic Details..."
                         start += 15
-                        data = fetch_data(cursor, st.session_state.kelas, st.session_state.mapel, st.session_state.topik)
+                        data = fetch_data(cursor, kelas=kelas, mapel=mapel, topik=topik)
                         st.session_state.topik_details = data['ringkasan']
                         progress_bar.progress(start, text=progress_text)
 
@@ -1296,6 +1320,5 @@ with st.container(border=True, key="form_container"):
             lock = cols[1].button("Lock", key="lock_button", use_container_width=True, on_click=lock_callback)
             gen = cols[0].button("Generate Roadmap", disabled=True, use_container_width=True, on_click=generate_roadmap_callback)
             res = cols[2].button("Reset", on_click=reset_callback, use_container_width=True)
-            st.markdown('<div class="subtext-form">Lengkapi form terlebih dahulu untuk mendapatkan roadmap pembelajaran</div>', unsafe_allow_html=True)
 
 roadmap_fragment()
