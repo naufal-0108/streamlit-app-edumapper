@@ -450,9 +450,6 @@ def roadmap_fragment():
     if "rev_toggle_status" not in st.session_state:
         st.session_state.rev_toggle_status = False
 
-    if "verificaton" not in st.session_state:
-        st.session_state.verification = None
-
     def rev_callback():
         st.session_state.gen_roadmap = False
         st.session_state.save = False
@@ -1016,6 +1013,9 @@ if "state_gen" not in st.session_state:
 
 if "gen_roadmap" not in st.session_state:
     st.session_state.gen_roadmap = False
+
+if "verification" not in st.session_state:
+    st.session_state.verification = None
 
 with st.sidebar:
     with st.container():
