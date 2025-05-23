@@ -54,39 +54,60 @@ def agent_init(model: str, temperature: float, max_tokens: int):
 def agent_1(_client, kelas: str, mapel: str, topik: str, topik_details:str, style: str, style_details:str, waktu: str, pertemuan: str, llm_params: dict, messages: list):
 
     teacher_agent_1_prompt = f"""
-    You are a highly experienced senior teacher who specializes in designing effective and engaging teaching strategies for Indonesian students.
-    Your job is to assist teachers in Indonesia by crafting a **comprehensive teaching roadmap** tailored to their class context and students’s learning styles.
+    Anda adalah seorang guru senior yang sangat berpengalaman dan berspesialisasi dalam merancang strategi pengajaran yang efektif dan menarik bagi siswa di Indonesia.
+    Tugas Anda adalah membantu para guru di Indonesia dengan menyusun **peta jalan pengajaran (teaching roadmap) yang komprehensif**, disesuaikan dengan konteks kelas dan gaya belajar siswa mereka.
+    Peta jalan ini harus membantu guru menyampaikan topik secara efisien dan memungkinkan siswa memahami materi secara menyeluruh.
 
-    The roadmap must help the teacher deliver the topic efficiently and enable the students to grasp the material thoroughly.
-    You will receive these inputs:
+    **Tahap 1: Verifikasi Input Topik Pembelajaran**
 
-    - **Kelas** (Education level of the students): 
-        {kelas}
-
-    - **Mata Pelajaran** (Subject being taught):
-        {mapel}
-
-    - **Topik Pembelajaran** (Specific topic within the subject):
+    Sebelum membuat roadmap, Anda HARUS melakukan verifikasi terhadap input berikut:
+    - **Topik Pembelajaran**
         {topik}
-
-    - **Topik Details** (Details of the topic (optional)):
+    
+    - **Topik Details**
         {topik_details}
 
-    - **Gaya Belajar** (Learning Style):
+    1.  **Analisis `Topik Pembelajaran`**:
+        * Apakah `Topik Pembelajaran` diisi dan bukan string kosong?
+        * Apakah `Topik Pembelajaran` ditulis dengan struktur kalimat yang jelas dan dapat dimengerti oleh manusia? (Contoh: bukan karakter acak, bukan kalimat yang terputus-putus atau tidak masuk akal, dan menyampaikan suatu pokok bahasan yang spesifik).
+        * Apakah `Topik Pembelajaran` cukup spesifik untuk dijadikan dasar pembuatan rencana pengajaran?
+
+    2.  **Analisis `Topik Details` (jika disediakan)**:
+        * Jika `Topik Details` diisi (bukan string kosong atau None):
+            * Apakah `Topik Details` ditulis dengan struktur kalimat yang jelas dan dapat dimengerti oleh manusia?
+            * Apakah `Topik Details` memberikan informasi tambahan yang relevan dan memperjelas `{topik}`?
+
+    3.  **Kondisi Verifikasi**:
+        * **Jika `Topik Pembelajaran` TIDAK memenuhi kriteria di atas (misalnya, kosong, tidak jelas, atau tidak terstruktur), ATAU jika `Topik Details` disediakan NAMUN TIDAK memenuhi kriteria di atas (tidak jelas atau tidak terstruktur):**
+            * **Hasilkan output HANYA pesan informasi berikut dalam Bahasa Indonesia dan JANGAN lanjutkan ke Tahap 2:**
+                "Informasi **Topik Pembelajaran** dan/atau **Detail Topik** yang Anda berikan belum cukup jelas atau strukturnya kurang baik. Mohon pastikan topik dan detailnya menggunakan kalimat yang runtut, mudah dipahami, dan memberikan informasi yang memadai. Silakan isi kembali."
+        * **Jika `Topik Pembelajaran` DAN `Topik Details` memenuhi kriteria di atas:**
+            * Lanjutkan ke **Tahap 2: Pembuatan Rencana Pengajaran**.
+
+    **Tahap 2: Pembuatan Rencana Pengajaran**
+
+    Jika verifikasi pada Tahap 1 berhasil, gunakan input berikut untuk membuat roadmap:
+
+    - **Kelas** (Tingkat pendidikan siswa):
+        {kelas}
+    - **Mata Pelajaran** (Pelajaran yang diajarkan):
+        {mapel}
+    - **Topik Pembelajaran** (Topik spesifik dalam mata pelajaran):
+        {topik}
+    - **Topik Details** (Detail dari topik (opsional)):
+        {topik_details}
+    - **Gaya Belajar** (Gaya Belajar siswa):
         {style}
-
-    - **Gaya Belajar Details** (Details of learning style (optional)):
+    - **Gaya Belajar Details** (Detail gaya belajar (opsional)):
         {style_details}
-
-    - **Waktu Belajar** (Total available teaching time in one day):
+    - **Waktu Belajar** (Total waktu pengajaran yang tersedia dalam satu hari):
         {waktu}
-
-    - **Pertemuan** (Number of days):
+    - **Pertemuan** (Jumlah hari pertemuan):
         {pertemuan}
+        
+    Berdasarkan input yang telah diverifikasi dan input lainnya di atas, hasilkan roadmap dalam **Bahasa Indonesia** dengan struktur berikut:
 
-    Based on these inputs, generate a roadmap in **Bahasa Indonesia** with the following structure:
-
-    ### Output Format (Write in Bahasa Indonesia):
+    ### Format Output (Tulis dalam Bahasa Indonesia):
 
     ```
     **Kriteria Pengajaran**
@@ -140,45 +161,63 @@ def agent_1(_client, kelas: str, mapel: str, topik: str, topik_details:str, styl
 def agent_2(_client, previous_roadmap:str, feedback: str, llm_params: dict, messages: list):
 
     teacher_agent_2_prompt = f"""
-Anda adalah seorang guru senior yang sangat berpengalaman, dengan keahlian khusus dalam mengevaluasi dan menyempurnakan rancangan pembelajaran (roadmap) untuk memaksimalkan efektivitas dan keterlibatan siswa di Indonesia.
-Tugas Anda adalah untuk merevisi dan meningkatkan **Rancangan Pembelajaran Sebelumnya** berdasarkan **Umpan Balik** spesifik yang diberikan oleh guru pengguna.
+**Persona & Tujuan Utama:**
+Anda adalah **GuruPakarAI**, sebuah AI yang dirancang untuk bertindak sebagai guru senior Indonesia yang sangat berpengalaman. Keahlian utama Anda adalah mengevaluasi dan menyempurnakan rancangan pembelajaran (roadmap) untuk memaksimalkan efektivitas dan keterlibatan siswa di Indonesia.
+Tujuan utama Anda adalah untuk merevisi dan meningkatkan **Rancangan Pembelajaran Sebelumnya** berdasarkan **Umpan Balik** spesifik yang diberikan oleh guru pengguna, menghasilkan versi yang lebih baik dan sesuai harapan.
 
 **Input yang Akan Anda Terima:**
 
-1.  **Rancangan Pembelajaran Sebelumnya (previous_roadmap):**
-    Ini adalah rancangan pembelajaran awal yang telah dibuat dan memerlukan penyesuaian.
+1.  `previous_roadmap`: String berisi rancangan pembelajaran awal yang perlu direvisi.
     ```
     {previous_roadmap}
     ```
-
-2.  **Umpan Balik (feedback):**
-    Ini adalah masukan, kritik, atau saran konkret dari guru pengguna terkait `previous_roadmap`.
+2.  `feedback`: String berisi masukan, kritik, atau saran konkret dari guru pengguna terkait `previous_roadmap`.
     ```
     {feedback}
     ```
 
-**Instruksi Utama untuk Penyempurnaan Rancangan:**
+**Proses Kerja yang Harus Diikuti:**
 
-1.  **Analisis Mendalam:** Pelajari `previous_roadmap` dan `feedback` secara saksama. Identifikasi dengan tepat bagian-bagian dari `previous_roadmap` yang disorot atau perlu disesuaikan berdasarkan setiap poin dalam `feedback`.
+**LANGKAH 1: Validasi Kualitas dan Relevansi Umpan Balik (`feedback`)**
+Sebelum melakukan revisi, lakukan validasi terhadap isi `feedback`:
+* **Kriteria Validasi:**
+    1.  **Dapat Dipahami:** Apakah `feedback` merupakan kalimat yang jelas, logis, dan dapat dimengerti oleh manusia?
+    2.  **Relevan:** Apakah `feedback` secara substantif berkaitan dengan konten, struktur, atau aspek lain dari `previous_roadmap` yang diberikan?
+* **Tindakan Berdasarkan Validasi:**
+    * **Jika `feedback` TIDAK VALID** (tidak memenuhi salah satu atau kedua kriteria di atas, misalnya: kalimat acak, tidak koheren, atau sama sekali tidak berhubungan dengan topik `previous_roadmap`):
+        * **Output Anda (dan HANYA ini)**:
+            Berikan kalimat awalan kepada user (guru) untuk memasukkan feedback yang valid dan sesuai ("silakan memasukkan feedback yang valid dan relevan agar saya dapat membantu Anda merevisi rancangan pembelajaran tersebut!"). 
+            Kemudian, kembalikan isi konten dari `previous_roadmap` secara utuh. Kedua dari poin tersebut, harus dijadikan dalam satu output bersamaan!**
+    * **Jika `feedback` VALID** (memenuhi kedua kriteria di atas):
+        * Lanjutkan ke LANGKAH 2.
 
-2.  **Modifikasi Terarah dan Presisi:**
-    * Lakukan perubahan pada `previous_roadmap` secara spesifik untuk merespons `feedback`. Jenis modifikasi dapat mencakup (namun tidak terbatas pada):
-        * **Penambahan:** Memasukkan detail, contoh, aktivitas, atau sumber daya baru yang relevan seperti yang disarankan atau tersirat dalam `feedback`.
-        * **Penghapusan:** Menghilangkan elemen yang dianggap tidak perlu, redundan, kurang efektif, atau dikritik dalam `feedback`.
-        * **Modifikasi/Perbaikan Kata-kata:** Menyempurnakan pilihan kata, struktur kalimat, atau penjelasan untuk meningkatkan kejelasan, keterbacaan, atau kesesuaian nada, tanpa mengubah substansi inti yang tidak dikritik.
-        * **Penyesuaian Konten:** Mengubah aspek tertentu dari langkah pembelajaran, metode penilaian, aktivitas refleksi, atau saran media agar lebih selaras dengan `feedback`.
+**LANGKAH 2: Revisi dan Penyempurnaan `previous_roadmap` (jika `feedback` valid)**
 
-3.  **Prinsip Utama Modifikasi:**
-    * **Pertahankan Integritas Inti:** Modifikasi yang Anda lakukan **tidak boleh merombak total** struktur utama atau konten esensial dari `previous_roadmap` yang tidak secara eksplisit atau implisit menjadi target `feedback`.
-    * **Fokus pada Umpan Balik:** Prioritaskan perubahan yang secara langsung menjawab poin-poin dalam `feedback`.
-    * **Koherensi:** Pastikan bahwa setelah modifikasi, keseluruhan rancangan pembelajaran tetap logis, koheren, dan semua bagiannya saling mendukung.
+1.  **Analisis Komprehensif:**
+    * Pelajari `previous_roadmap` secara detail.
+    * Pahami setiap poin dalam `feedback` dan identifikasi dengan presisi bagian-bagian dari `previous_roadmap` yang memerlukan penyesuaian berdasarkan `feedback` tersebut.
 
-4.  **Format Output (dalam Bahasa Indonesia):**
-    * Hasil akhir harus berupa hanya konten rancangan roadmap yang telah direvisi secara lengkap (**tanpa adanya penambahan kalimat awal seperti "Rancangan Pembelajaran yang Telah Direvisi" dan diakhir!**).
-    * **Gunakan format dan struktur yang sama persis** seperti yang ada pada `previous_roadmap`. Jika `previous_roadmap` memiliki bagian seperti "Kriteria Pengajaran", "Objektif Capaian", "Road Map Pengajaran", dll., maka output Anda juga harus mempertahankan bagian-bagian tersebut dengan konten yang sudah diperbarui sesuai hasil revisi.
+2.  **Terapkan Modifikasi Terarah pada `previous_roadmap`:**
+    Lakukan perubahan yang spesifik dan relevan untuk merespons setiap poin dalam `feedback`. Jenis modifikasi dapat meliputi:
+    * **Penambahan:** Integrasikan detail, contoh konkret, aktivitas baru, atau sumber daya yang relevan seperti yang disarankan atau diimplikasikan oleh `feedback`.
+    * **Penghapusan:** Hilangkan elemen yang dinilai tidak perlu, redundan, kurang efektif, atau dikritik dalam `feedback`.
+    * **Modifikasi/Perbaikan Formulasi Kalimat:** Sempurnakan pilihan kata, struktur kalimat, atau kejelasan penjelasan untuk meningkatkan keterbacaan atau kesesuaian nada, tanpa mengubah substansi inti yang tidak menjadi target `feedback`.
+    * **Penyesuaian Konten Spesifik:** Ubah aspek tertentu seperti langkah-langkah pembelajaran, metode penilaian, aktivitas refleksi, atau saran media agar lebih selaras dengan `feedback`.
 
-Tujuan Anda adalah menghasilkan versi rancangan pembelajaran yang disempurnakan, lebih efektif, dan lebih memenuhi ekspektasi guru pengguna berdasarkan umpan baliknya, sambil tetap menghargai dan mempertahankan kerangka kerja serta konten positif dari rancangan sebelumnya.
-Sajikan seluruh output dalam **Bahasa Indonesia** yang profesional dan jelas.
+3.  **Prinsip Panduan Revisi (WAJIB DIPATUHI):**
+    * **Pertahankan Integritas Inti:** Modifikasi **tidak boleh merombak total** struktur utama atau konten esensial dari `previous_roadmap` yang tidak secara eksplisit atau implisit ditargetkan oleh `feedback`. Fokus pada penyempurnaan, bukan penggantian total.
+    * **Prioritaskan Umpan Balik:** Semua perubahan harus secara langsung menjawab atau didasari oleh poin-poin dalam `feedback`.
+    * **Jaga Koherensi:** Pastikan rancangan pembelajaran yang telah direvisi tetap logis, koheren secara keseluruhan, dan semua bagiannya saling mendukung.
+    * **Konteks Indonesia:** Pastikan semua saran dan modifikasi tetap relevan dengan konteks pendidikan di Indonesia.
+
+**Format Output Akhir (jika `feedback` valid dan revisi dilakukan):**
+
+* **Konten Utama:** Hasil akhir **HARUS HANYA BERISI** konten rancangan roadmap yang telah direvisi secara lengkap.
+* **TANPA Tambahan Narasi:** Jangan menyertakan kalimat pembuka (seperti "Berikut adalah rancangan yang telah direvisi:") atau kalimat penutup atau komentar tambahan APAPUN dari Anda di awal maupun di akhir output. Langsung sajikan hasil revisi.
+* **Struktur Identik:** Gunakan format dan struktur yang **sama persis** dengan `previous_roadmap` asli. Jika `previous_roadmap` memiliki bagian-bagian tertentu (misalnya, "Judul", "Tujuan Pembelajaran", "Langkah-Langkah", "Penilaian", dll.), output Anda harus mempertahankan struktur dan nama bagian tersebut, namun dengan konten yang sudah diperbarui sesuai hasil revisi Anda.
+* **Bahasa:** Seluruh output harus disajikan dalam **Bahasa Indonesia** yang profesional, baku, dan jelas.
+
+Pastikan Anda secara ketat mengikuti semua instruksi di atas.
 """
     
     messages += [{"role": "user", "content": teacher_agent_2_prompt}]
@@ -187,6 +226,7 @@ Sajikan seluruh output dalam **Bahasa Indonesia** yang profesional dan jelas.
                                                 temperature=llm_params["temperature"], messages=messages)
     
     return response.choices[0].message.content
+
 
 
 @st.cache_data
@@ -316,6 +356,9 @@ def roadmap_fragment():
     if "title" not in st.session_state:
         st.session_state.title = None
 
+    if "rev_toggle_status" not in st.session_state:
+        st.session_state.rev_toggle_status = False
+
     def rev_callback():
         st.session_state.gen_roadmap = False
         st.session_state.save = False
@@ -329,6 +372,8 @@ def roadmap_fragment():
     def rev_confirm_callback():
         st.session_state.gen_roadmap = True
 
+    def rev_toggle_callback():
+        st.session_state.rev_toggle_status = st.session_state.rev_toggle
     def author_callback():
         st.session_state.author = st.session_state.author_text_input
     
@@ -464,7 +509,7 @@ def roadmap_fragment():
  
         elif st.session_state.state_gen == "second":
             if st.session_state.gen_roadmap:
-                if st.session_state.rev_toggle:
+                if st.session_state.rev_toggle_status:
 
                     start = 0
 
@@ -599,6 +644,7 @@ def roadmap_fragment():
                 rev_toggle = st.toggle(
                     "Komentar Tambahan?",
                     key="rev_toggle",
+                    on_change=rev_toggle_callback
                 )
 
                 if rev_toggle:
@@ -657,6 +703,14 @@ dict_options = {
 }
 
 
+placeholder_text_area = """
+Gunakan '<SEP>' untuk memisahkan antara judul topik dan detail dari topik.
+Berikut contohnya:
+
+(Judul Topik)
+<SEP>
+(Detail Topik)
+"""
 
 
 kelas_str = """
@@ -911,7 +965,7 @@ with st.container(border=True, key="form_container"):
                     topik = st.text_area(label="Masukkan topik pembelajaran yang Anda inginkan:",
                                         value=None if st.session_state.topik is None else st.session_state.topik,
                                         height=200,
-                                        placeholder="Contoh: Zat dan Perubahannya",
+                                        placeholder=placeholder_text_area,
                                         key="topik_textarea",
                                         help="Informasi terdapat di sidebar.",
                                         on_change=topik_callback)
