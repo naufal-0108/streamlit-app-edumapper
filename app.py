@@ -393,7 +393,8 @@ def roadmap_fragment():
                         progress_text = "Creating Roadmap..."
                         progress_bar.progress(start, text=progress_text)
                         assert all([kelas, mapel, topik, style, style_details, waktu, pertemuan]), "All variables must be filled"
-                        roadmap = agent_1(llm_client, kelas, mapel, topik, style, style_details, waktu, pertemuan, llm_params, topik_details="None", messages=[])
+                        roadmap = agent_1(llm_client, kelas=kelas, mapel=mapel, topik=topik, topik_details="None", style=style,
+                                          style_details=style_details, waktu=waktu, pertemuan=pertemuan, llm_params=llm_params, messages=[])
                         st.session_state.state_gen = "second"
                         st.session_state.roadmap_text = roadmap
 
@@ -441,7 +442,8 @@ def roadmap_fragment():
                         start += 45
                         progress_bar.progress(start, text=progress_text)
                         assert all([kelas, mapel, topik, style, style_details, waktu, pertemuan, st.session_state.topik_details]), "All variables must be filled"
-                        roadmap = agent_1(llm_client, kelas, mapel, topik, st.session_state.topik_details, style, style_details, waktu, pertemuan, llm_params, messages=[])
+                        roadmap = agent_1(llm_client, kelas=kelas, mapel=mapel, topik=topik, topik_details=st.session_state.topik_details, style=style,
+                                          style_details=style_details, waktu=waktu, pertemuan=pertemuan, llm_params=llm_params, messages=[])
                         st.session_state.state_gen = "second"
                         st.session_state.roadmap_text = roadmap
 
@@ -520,7 +522,8 @@ def roadmap_fragment():
                         progress_text = "Creating Roadmap..."
                         progress_bar.progress(start, text=progress_text)
                         assert all([kelas, mapel, topik, style, style_details, waktu, pertemuan]), "All variables must be filled"
-                        roadmap = agent_1(llm_client, kelas, mapel, topik, style, style_details, waktu, pertemuan, llm_params, topik_details="None", messages=[])
+                        roadmap = agent_1(llm_client, kelas=kelas, mapel=mapel, topik=topik, topik_details="None", style=style,
+                                          style_details=style_details, waktu=waktu, pertemuan=pertemuan, llm_params=llm_params, messages=[])
                         st.session_state.roadmap_text = roadmap
 
                         progress_text = "Finished!"
@@ -567,7 +570,8 @@ def roadmap_fragment():
                         progress_bar.progress(start, text=progress_text)
 
                         assert all([kelas, mapel, topik, style, style_details, waktu, pertemuan, st.session_state.topik_details]), "All variables must be filled"
-                        roadmap = agent_1(llm_client, kelas, mapel, topik, st.session_state.topik_details, style, style_details, waktu, pertemuan, llm_params, messages=[])
+                        roadmap = agent_1(llm_client, kelas=kelas, mapel=mapel, topik=topik, topik_details=st.session_state.topik_details, style=style,
+                                          style_details=style_details, waktu=waktu, pertemuan=pertemuan, llm_params=llm_params, messages=[])
                         st.session_state.roadmap_text = roadmap
 
                         progress_text = "Finished!"
