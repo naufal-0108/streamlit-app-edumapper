@@ -260,8 +260,16 @@ def topik_toggle_callback():
 
 def topik_callback():
     if st.session_state.topik_toggle:
-        st.session_state.topik = st.session_state.topik_textarea
-        st.session_state.topik_update = st.session_state.topik_textarea
+        splitted_text = len(st.session_state.topik_textarea.strip().split("<SEP>"))
+        logging.info(splitted_text)
+        if splitted_text != 2:
+            st.session_state.topik = None
+            st.session_state.topik_update = None
+            st.session_state.topik_textarea = None
+        
+        else:
+            st.session_state.topik = st.session_state.topik_textarea
+            st.session_state.topik_update = st.session_state.topik_textarea
     else:
         st.session_state.topik = st.session_state.topik_select
         st.session_state.topik_update = st.session_state.topik_select
@@ -293,7 +301,14 @@ def topik_toggle_update_callback():
 
 def topik_update_callback():
     if st.session_state.topik_toggle_update_state:
-        st.session_state.topik_update = st.session_state.topik_textarea_update
+        splitted_text = len(st.session_state.topik_textarea_update.strip().split("<SEP>"))
+        logging.info(splitted_text)
+        if splitted_text != 2:
+            st.session_state.topik_update = None
+            st.session_state.topik_textarea_update = None
+
+        else:
+            st.session_state.topik_update = st.session_state.topik_textarea_update
     else:
         st.session_state.topik_update = st.session_state.topik_select_update
 
@@ -703,8 +718,7 @@ dict_options = {
 }
 
 
-placeholder_text_area = """
-Gunakan '<SEP>' untuk memisahkan antara judul topik dan detail dari topik.
+placeholder_text_area = """Gunakan '<SEP>' untuk memisahkan antara judul topik dan detail dari topik.
 Berikut contohnya:
 
 (Judul Topik)
