@@ -51,106 +51,79 @@ def agent_init(model: str, temperature: float, max_tokens: int):
 
     return client, llm_params
 
-def agent_1(_client, kelas: str, mapel: str, topik: str, topik_details:str, style: str, style_details:str, waktu: str, pertemuan: str, llm_params: dict, messages: list):
+def agent_teacher(_client, kelas: str, mapel: str, topik: str, topik_details:str, style: str, style_details:str, waktu: str, pertemuan: str, llm_params: dict):
 
-    teacher_agent_1_prompt = f"""
-    Anda adalah seorang guru senior yang sangat berpengalaman dan berspesialisasi dalam merancang strategi pengajaran yang efektif dan menarik bagi siswa di Indonesia.
-    Tugas Anda adalah membantu para guru di Indonesia dengan menyusun **peta jalan pengajaran (teaching roadmap) yang komprehensif**, disesuaikan dengan konteks kelas dan gaya belajar siswa mereka.
-    Peta jalan ini harus membantu guru menyampaikan topik secara efisien dan memungkinkan siswa memahami materi secara menyeluruh.
+    agent_prompt = f"""
+Anda adalah seorang guru senior yang sangat berpengalaman dan berspesialisasi dalam merancang strategi pengajaran yang efektif dan menarik bagi siswa di Indonesia.
+Tugas Anda adalah membantu para guru di Indonesia dengan menyusun **peta jalan pengajaran (teaching roadmap) yang komprehensif**.
+Peta jalan ini harus membantu guru menyampaikan topik secara efisien dan memungkinkan siswa memahami materi secara menyeluruh.
 
-    **Tahap 1: Verifikasi Input Topik Pembelajaran**
+**Input yang Akan Anda Terima:**
 
-    Sebelum membuat roadmap, Anda HARUS melakukan verifikasi terhadap input berikut:
-    - **Topik Pembelajaran**
-        {topik}
+- **Kelas** (Tingkat pendidikan siswa):
+    {kelas}
+- **Mata Pelajaran** (Pelajaran yang diajarkan):
+    {mapel}
+- **Topik Pembelajaran** (Topik spesifik dalam mata pelajaran):
+    {topik}
+- **Topik Details** (Detail dari topik (opsional)):
+    {topik_details}
+- **Gaya Belajar** (Gaya Belajar siswa):
+    {style}
+- **Gaya Belajar Details** (Detail gaya belajar (opsional)):
+    {style_details}
+- **Waktu Belajar** (Total waktu pengajaran yang tersedia dalam satu hari):
+    {waktu}
+- **Pertemuan** (Jumlah hari pertemuan):
+    {pertemuan}
+
+**Pembuatan Rencana Pengajaran**
     
-    - **Topik Details**
-        {topik_details}
+Berdasarkan **input** yang telah diberikan, hasilkan roadmap dalam **Bahasa Indonesia** dengan struktur berikut:
 
-    1.  **Analisis `Topik Pembelajaran`**:
-        * Apakah `Topik Pembelajaran` diisi dan bukan string kosong?
-        * Apakah `Topik Pembelajaran` ditulis dengan struktur kalimat yang jelas dan dapat dimengerti oleh manusia? (Contoh: bukan karakter acak, bukan kalimat yang terputus-putus atau tidak masuk akal, dan menyampaikan suatu pokok bahasan yang spesifik).
-        * Apakah `Topik Pembelajaran` cukup spesifik untuk dijadikan dasar pembuatan rencana pengajaran?
+### Format Output (Tulis dalam Bahasa Indonesia):
 
-    2.  **Analisis `Topik Details` (jika disediakan)**:
-        * Jika `Topik Details` diisi (bukan string kosong atau None):
-            * Apakah `Topik Details` ditulis dengan struktur kalimat yang jelas dan dapat dimengerti oleh manusia?
-            * Apakah `Topik Details` memberikan informasi tambahan yang relevan dan memperjelas `{topik}`?
-
-    3.  **Kondisi Verifikasi**:
-        * **Jika `Topik Pembelajaran` TIDAK memenuhi kriteria di atas (misalnya, kosong, tidak jelas, atau tidak terstruktur), ATAU jika `Topik Details` disediakan NAMUN TIDAK memenuhi kriteria di atas (tidak jelas atau tidak terstruktur):**
-            * **Hasilkan output HANYA pesan informasi berikut dalam Bahasa Indonesia dan JANGAN lanjutkan ke Tahap 2:**
-                "<generation_error>Informasi **Topik Pembelajaran** dan/atau **Detail Topik** yang Anda berikan belum cukup jelas atau strukturnya kurang baik. Mohon pastikan topik dan detailnya menggunakan kalimat yang runtut, mudah dipahami, dan memberikan informasi yang memadai. Silakan isi topik kembali.</generation_error>"
-        * **Jika `Topik Pembelajaran` DAN `Topik Details` memenuhi kriteria di atas:**
-            * Lanjutkan ke **Tahap 2: Pembuatan Rencana Pengajaran**.
-
-    **Tahap 2: Pembuatan Rencana Pengajaran**
-
-    Jika verifikasi pada Tahap 1 berhasil, gunakan input berikut untuk membuat roadmap:
-
-    - **Kelas** (Tingkat pendidikan siswa):
-        {kelas}
-    - **Mata Pelajaran** (Pelajaran yang diajarkan):
-        {mapel}
-    - **Topik Pembelajaran** (Topik spesifik dalam mata pelajaran):
-        {topik}
-    - **Topik Details** (Detail dari topik (opsional)):
-        {topik_details}
-    - **Gaya Belajar** (Gaya Belajar siswa):
-        {style}
-    - **Gaya Belajar Details** (Detail gaya belajar (opsional)):
-        {style_details}
-    - **Waktu Belajar** (Total waktu pengajaran yang tersedia dalam satu hari):
-        {waktu}
-    - **Pertemuan** (Jumlah hari pertemuan):
-        {pertemuan}
-        
-    Berdasarkan input yang telah diverifikasi dan input lainnya di atas, hasilkan roadmap dalam **Bahasa Indonesia** dengan struktur berikut:
-
-    ### Format Output (Tulis dalam Bahasa Indonesia):
-
-    ```
-    **Kriteria Pengajaran**
-    <one_space>
-    - Kelas           : ...
-    - Mata Pelajaran  : ...
-    - Topik Pelajaran : ...
-    - Gaya Pengajaran : ...
-    - Waktu Belajar   : ...
-    - Pertemuan       : ...
-    <one_space>
-    **Objektif Capaian**
-    <one_space>
-    (Tuliskan minimal 5 tujuan pembelajaran yang jelas, spesifik, dan terukur.)
-    <one_space>
-    **Road Map Pengajaran**
-    <one_space>
-    (Rincikan langkah-langkah pengajaran yang disesuaikan dengan konteks dari inputs yang diberikan, terdiri dari beberapa pertemuan jika perlu. Setiap pertemuan minimal 5 poin langkah atau aktivitas.)
-    <one_space>
-    **Aktivitas Refleksi**
-    <one_space>
-    (Berikan ide aktivitas untuk membantu siswa merefleksikan apa yang mereka pelajari, misalnya: jurnal belajar, diskusi kelompok, exit ticket, dll.)
-    <one_space>
-    **Penilaian Formatif**
-    <one_space>
-    (Sertakan metode evaluasi selama proses belajar, seperti kuis singkat, observasi, pertanyaan terbuka, lembar kerja, dll.)
-    <one_space>
-    **Ide Kuis / Tes Singkat**
-    <one_space>
-    (Tampilkan 3–5 contoh pertanyaan kuis yang bisa digunakan guru untuk mengukur pemahaman siswa.)
-    <one_space>
-    **Saran Media & Alat Bantu**
-    <one_space>
-    (Rekomendasikan media pembelajaran atau alat bantu yang sesuai dengan gaya belajar siswa yang telah diberikan pada inputs.)
-    <one_space>
-    **Catatan Tambahan untuk Guru**
-    <one_space>
-    (Berikan tips tambahan atau hal-hal yang perlu diantisipasi saat mengajar topik ini.)
-    ```
-
-    Gunakan bahasa Indonesia yang jelas, alami, dan mudah dipahami oleh guru. Tulis seolah-olah Anda sedang membimbing guru baru untuk mengajar dengan percaya diri dan efektif.
+```
+**Kriteria Pengajaran**
+<one_space>
+- Kelas           : ...
+- Mata Pelajaran  : ...
+- Topik Pelajaran : ...
+- Gaya Pengajaran : ...
+- Waktu Belajar   : ...
+- Pertemuan       : ...
+<one_space>
+**Objektif Capaian**
+<one_space>
+(Tuliskan minimal 5 tujuan pembelajaran yang jelas, spesifik, dan terukur.)
+<one_space>
+**Road Map Pengajaran**
+<one_space>
+(Rincikan langkah-langkah pengajaran yang disesuaikan dengan konteks dari inputs yang diberikan, terdiri dari beberapa pertemuan jika perlu. Setiap pertemuan minimal 5 poin langkah atau aktivitas.)
+<one_space>
+**Aktivitas Refleksi**
+<one_space>
+(Berikan ide aktivitas untuk membantu siswa merefleksikan apa yang mereka pelajari, misalnya: jurnal belajar, diskusi kelompok, exit ticket, dll.)
+<one_space>
+**Penilaian Formatif**
+<one_space>
+(Sertakan metode evaluasi selama proses belajar, seperti kuis singkat, observasi, pertanyaan terbuka, lembar kerja, dll.)
+<one_space>
+**Ide Kuis / Tes Singkat**
+<one_space>
+(Tampilkan 3–5 contoh pertanyaan kuis yang bisa digunakan guru untuk mengukur pemahaman siswa.)
+<one_space>
+**Saran Media & Alat Bantu**
+<one_space>
+(Rekomendasikan media pembelajaran atau alat bantu yang sesuai dengan gaya belajar siswa yang telah diberikan pada inputs.)
+<one_space>
+**Catatan Tambahan untuk Guru**
+<one_space>
+(Berikan tips tambahan atau hal-hal yang perlu diantisipasi saat mengajar topik ini.)
+```
+Gunakan bahasa Indonesia yang jelas, alami, dan mudah dipahami oleh guru. Tulis seolah-olah Anda sedang membimbing guru baru untuk mengajar dengan percaya diri dan efektif.
     """
-    messages += [{"role": "user", "content": teacher_agent_1_prompt}]
+    messages = [{"role": "user", "content": agent_prompt}]
     
 
     response = _client.chat.completions.create(model=llm_params["model"], max_tokens=llm_params["max_tokens"],
@@ -158,7 +131,7 @@ def agent_1(_client, kelas: str, mapel: str, topik: str, topik_details:str, styl
     return response.choices[0].message.content
 
 
-def agent_2(_client, previous_roadmap:str, feedback: str, llm_params: dict, messages: list):
+def agent_reviser(_client, previous_roadmap:str, feedback: str, llm_params: dict):
 
     teacher_agent_2_prompt = f"""
 **Persona & Tujuan Utama:**
@@ -220,13 +193,117 @@ Sebelum melakukan revisi, lakukan validasi terhadap isi `feedback`:
 Pastikan Anda secara ketat mengikuti semua instruksi di atas.
 """
     
-    messages += [{"role": "user", "content": teacher_agent_2_prompt}]
+    messages = [{"role": "user", "content": teacher_agent_2_prompt}]
     
     response = _client.chat.completions.create(model=llm_params["model"], max_tokens=llm_params["max_tokens"],
                                                 temperature=llm_params["temperature"], messages=messages)
     
     return response.choices[0].message.content
 
+def agent_verificator(_client, mapel:str, topik: str, topik_details: str):
+    agent_prompt = f"""
+**Persona & Tujuan Utama:**
+Anda adalah verifikator yang kompeten dan sangat teliti dalam melakukan proses verifikasi. Sebagai konteks, Anda bekerja dengan Agent Guru 1 & Guru 2 yang mana mempunyai tugas untuk membuat suatu personalisasi rancangan pembelajaran yang komprehensif berdasarkan **input** yang diberikan.
+Tugas Anda disini adalah membantu kedua agen, yaitu Guru 1 & Guru 2 untuk melakukan verifikasi secara mendalam terlebih dahulu terhadap konten dari topik, detail topik, dan mata pelajaran. Hal ini bertujuan untuk memastikan konten ketiganya valid, selaras, sesuai, dan tidak saling bertabrakan.
+Berikut adalah langkah-langkah yang wajib Anda ikuti dan patuhi:
+
+**Input yang akan Anda terima**
+
+1. `mapel` merupakan mata pelajaran yang akan diajarkan, seperti: IPA, IPS, Matematika, dan lainnya:
+    ```
+    {mapel}
+    ```
+2. `topik` merupakan topik pembahasan dari mata pelajaran yang akan diajarkan:
+    ```
+    {topik}
+    ```
+3. `topik_details` merupakan penjelasan yang lebih lengkap terkait dengan topik pembahasaan, seperti: sub-sub bab dari topik pembahasan:
+    ```
+    {topik_details}
+    ```
+
+**Langkah 1: Verifikasi isi konten dari `topik`, dan `topik_details`**
+* **Kriteria Validasi**:
+    2. **Kecukupan Konten**: Apakah `topik`, dan `topik_details` telah diisi (bukan string kosong atau hanya spasi)? 
+    1. **Dapat Dipahami:** Apakah `topik`, dan `topik_details` merupakan kalimat yang jelas, logis, dan dapat dimengerti oleh manusia?
+* **JIKA SALAH SATU **Kriteria Validasi** TIDAK MEMENUHI, ANDA DILARANG UNTUK MELANJUTKAN KE TAHAPAN SELANJUTNYA:
+    * **Output Anda HARUS HANYA berupa pesan informasi berikut dalam Bahasa Indonesia seperti berikut:**
+        ```
+        <generation_error_type_1>Mohon pastikan topik dan detail topik sudah lengkap dan menggunakan kalimat yang runtut dan mudah dipahami. Silakan perbaiki dan isi kembali.</generation_error_type_1>
+        ```
+
+**Langkah 2: Verifikasi keselarasan isi konten dari `mapel`, `topik`, dan `topik_details`**
+* **Kriteria Validasi**:
+    1. **Keselaraan Konten `topik` dengan `mapel`**
+        Apakah konten dari `mapel` dan `topik` sudah selaras yang mana `topik` harus mengacu kepada pembasan yang valid dari ruang lingkup ilmu pengetahuan {mapel}
+        Sebagai contoh:
+        ```
+        CONTOH PERTAMA:
+
+            `mapel`: IPA
+            `topik`: Sistem Persamaan Linear 2 Variabel
+
+            KESIMPULAN: TIDAK VALID karena "Sistem Persamaan Linear 2 Variabel" dibahas dalam mata pelajaran Matematika bukan IPA
+
+        CONTOH KEDUA:
+
+            `mapel`: IPS
+            `topik`: Sistem Persamaan Linear 2 Variabel
+
+            KESIMPULAN: TIDAK VALID karena "Sistem Persamaan Linear 2 Variabel" dibahas dalam mata pelajaran Matematika bukan IPS
+
+        CONTOH KETIGA:
+
+            `mapel`: IPA
+            `topik`: Getaran, Gelombang dan Cahaya
+
+            KESIMPULAN: VALID karena "Getaran, Gelombang dan Cahaya" dibahas dalam mata pelajaran IPA
+        ```
+
+    2. **Keselaraan Konten `topik` dengan `topik_details`**
+        Apakah konten dari `topik` dan `topik_details` sudah selaras yang mana `topik_details` harus sesusai terhadap pembasan yang valid dari {topik}
+        Sebagai contoh:
+        ```
+        CONTOH PERTAMA:
+
+            `topik`: Sistem Persamaan Linear 2 Variabel
+            `topik_details`: 
+                Mempelajari fenomena fisika terkait getaran, karakteristik dan jenis gelombang, serta sifat-sifat cahaya dan aplikasinya dalam alat optik.
+                Sub-bab:
+                    Getaran
+                        Deskripsi: Mendefinisikan getaran sebagai gerakan periodik bolak-balik dan besaran-besaran terkait (amplitudo, frekuensi, periode).
+                    Gelombang
+                        Deskripsi: Menjelaskan konsep gelombang sebagai rambatan getaran, jenis-jenisnya, sifat-sifat, dan besaran-besaran gelombang.
+                    Cahaya dan Alat Optik
+                        Deskripsi: Menguraikan sifat-sifat cahaya, pembentukan bayangan oleh cermin dan lensa, serta prinsip kerja alat-alat optik.
+
+
+            KESIMPULAN: TIDAK VALID karena `topik_details` tidak membahas dan menjelaskan lebih lanjut terkait dengan `topik` yang diberikan.
+
+        CONTOH KEDUA:
+
+            `topik`: Sistem Persamaan Linear 2 Variabel
+            `topik_details`: 
+                Deskripsi Bab: Memperkenalkan konsep sistem persamaan linear dengan dua variabel (SPLDV) dan metode penyelesaiannya, serta aplikasinya.
+                Sub-bab:
+                    Sistem persamaan linear variabel
+                        Deskripsi: Mendefinisikan sistem persamaan linear dua variabel, cara membuat model matematika dari situasi nyata, dan metode penyelesaian (grafik, substitusi, eliminasi).
+                    Aplikasi sistem persamaan linear 2 variabel
+                        Deskripsi: Menerapkan SPLDV untuk menyelesaikan berbagai soal cerita dan masalah dalam kehidupan sehari-hari.
+
+            KESIMPULAN: VALID karena membahas dan menjelaskan lebih lanjut terkait dengan `topik` yang diberikan.
+        ```
+* **JIKA SALAH SATU **Kriteria Validasi** TIDAK MEMENUHI:
+    * **Output Anda HARUS HANYA berupa pesan informasi berikut dalam Bahasa Indonesia seperti berikut:**
+        ```
+        <generation_error_type_2>Mohon pastikan mata pelajaran, topik dan detail topik sudah selaras dan menggunakan kalimat yang runtut dan mudah dipahami. Silakan perbaiki dan isi kembali.</generation_error_type_2>
+        ```
+"""
+    messages = [{"role": "user", "content": agent_prompt}]
+    response = _client.chat.completions.create(model=llm_params["model"], max_tokens=1024,
+                                                temperature=0.5, messages=messages)
+    
+    return response.choices[0].message.content
 
 
 @st.cache_data
@@ -261,7 +338,6 @@ def topik_toggle_callback():
 def topik_callback():
     if st.session_state.topik_toggle:
         splitted_text = len(st.session_state.topik_textarea.strip().split("<SEP>"))
-        logging.info(splitted_text)
         if splitted_text != 2:
             st.session_state.topik = None
             st.session_state.topik_update = None
@@ -374,6 +450,9 @@ def roadmap_fragment():
     if "rev_toggle_status" not in st.session_state:
         st.session_state.rev_toggle_status = False
 
+    if "verificaton" not in st.session_state:
+        st.session_state.verification = None
+
     def rev_callback():
         st.session_state.gen_roadmap = False
         st.session_state.save = False
@@ -433,7 +512,8 @@ def roadmap_fragment():
                     if st.session_state.topik_toggle_update_state:
                         kelas = st.session_state.kelas_update
                         mapel = st.session_state.mapel_update
-                        topik = st.session_state.topik_update
+                        topik = st.session_state.topik_update.split("<SEP>")[0]
+                        topik_details = st.session_state.topik_update.split("<SEP>")[1]
                         style = st.session_state.style_update
                         style_details = dict_style.get(st.session_state.style_update, None)["Deskripsi"]
                         waktu = st.session_state.waktu_update
@@ -449,33 +529,41 @@ def roadmap_fragment():
                         progress_bar.progress(start, text=progress_text)
 
                         time.sleep(1)
-                        start += 50
-                        progress_text = "Creating Roadmap..."
+                        progress_text = "Verifying Inputs..."
+                        start += 25
+                        verify_results = agent_verificator(llm_client, mapel=mapel, topik=topik, topik_details=topik_details)
+                        st.session_state.verification = verify_results
                         progress_bar.progress(start, text=progress_text)
-                        assert all([kelas, mapel, topik, style, style_details, waktu, pertemuan]), "All variables must be filled"
-                        roadmap = agent_1(llm_client, kelas=kelas, mapel=mapel, topik=topik, topik_details="None", style=style,
-                                          style_details=style_details, waktu=waktu, pertemuan=pertemuan, llm_params=llm_params, messages=[])
-                        progress_text = "Finished!"
-                        progress_bar.progress(100, text=progress_text)
-                        progress_bar.empty()
 
-                        st.session_state.roadmap_text = roadmap
-
-                        if "<generation_error>" in roadmap:
-                            st.divider()
-                            st.markdown('<div class="roadmap-text">Roadmap Pembelajaran</div>', unsafe_allow_html=True)
-                            st.divider()
-                            st.write(st.session_state.roadmap_text)
-                            
+                        if "<generation_error_type_1>" in verify_results:
                             st.session_state.lock = False
                             st.session_state.gen = False
                             st.session_state.generate_roadmap = False
                             st.session_state.gen_roadmap = False
-                            cols = st.columns(2)
-                            cols[0].button("Save", use_container_width=True, key="save_button", on_click=save_callback, disabled=True)
-                            cols[1].button("Regenerate", use_container_width=True, key="rev_button", on_click=rev_callback, disabled=True)
+                            st.error(st.session_state.verification, icon="🚨")
                             st.rerun()
+
+                        elif "<generation_error_type_2>" in verify_results:
+                            st.session_state.lock = False
+                            st.session_state.gen = False
+                            st.session_state.generate_roadmap = False
+                            st.session_state.gen_roadmap = False
+                            st.error(st.session_state.verification, icon="🚨")
+                            st.rerun()
+                        
                         else:
+                            time.sleep(1)
+                            start += 25
+                            progress_text = "Creating Roadmap..."
+                            progress_bar.progress(start, text=progress_text)
+                            assert all([kelas, mapel, topik, style, style_details, waktu, pertemuan]), "All variables must be filled"
+                            roadmap = agent_teacher(llm_client, kelas=kelas, mapel=mapel, topik=topik, topik_details=topik_details, style=style,
+                                            style_details=style_details, waktu=waktu, pertemuan=pertemuan, llm_params=llm_params)
+                            progress_text = "Finished!"
+                            progress_bar.progress(100, text=progress_text)
+                            progress_bar.empty()
+
+                            st.session_state.roadmap_text = roadmap
                             st.session_state.state_gen = "second"
                             st.divider()
                             st.markdown('<div class="roadmap-text">Roadmap Pembelajaran</div>', unsafe_allow_html=True)
@@ -518,8 +606,8 @@ def roadmap_fragment():
                         start += 45
                         progress_bar.progress(start, text=progress_text)
                         assert all([kelas, mapel, topik, style, style_details, waktu, pertemuan, st.session_state.topik_details]), "All variables must be filled"
-                        roadmap = agent_1(llm_client, kelas=kelas, mapel=mapel, topik=topik, topik_details=st.session_state.topik_details, style=style,
-                                          style_details=style_details, waktu=waktu, pertemuan=pertemuan, llm_params=llm_params, messages=[])
+                        roadmap = agent_teacher(llm_client, kelas=kelas, mapel=mapel, topik=topik, topik_details=st.session_state.topik_details, style=style,
+                                          style_details=style_details, waktu=waktu, pertemuan=pertemuan, llm_params=llm_params)
                         st.session_state.state_gen = "second"
                         st.session_state.roadmap_text = roadmap
 
@@ -538,13 +626,7 @@ def roadmap_fragment():
                         cols[0].button("Save", use_container_width=True, key="save_button", on_click=save_callback)
                         cols[1].button("Regenerate", use_container_width=True, key="rev_button", on_click=rev_callback)
             else:
-                st.divider()
-                st.markdown('<div class="roadmap-text">Roadmap Pembelajaran</div>', unsafe_allow_html=True)
-                st.divider()
-                st.write(st.session_state.roadmap_text)
-                cols = st.columns(2)
-                cols[0].button("Save", use_container_width=True, key="save_button", on_click=save_callback, disabled=True)
-                cols[1].button("Regenerate", use_container_width=True, key="rev_button", on_click=rev_callback, disabled=True)
+                st.error(st.session_state.roadmap_text, icon="🚨")
 
         elif st.session_state.state_gen == "second":
             if st.session_state.gen_roadmap:
@@ -563,7 +645,7 @@ def roadmap_fragment():
                     start += 50
                     progress_text = "Creating Roadmap..."
                     progress_bar.progress(start, text=progress_text)
-                    roadmap = agent_2(llm_client, previous_roadmap=st.session_state.roadmap_text, feedback=st.session_state.rev_comment, llm_params=llm_params, messages=[])
+                    roadmap = agent_reviser(llm_client, previous_roadmap=st.session_state.roadmap_text, feedback=st.session_state.rev_comment, llm_params=llm_params)
                     st.session_state.roadmap_text = roadmap
 
                     progress_text = "Finished!"
@@ -606,8 +688,8 @@ def roadmap_fragment():
                         progress_text = "Creating Roadmap..."
                         progress_bar.progress(start, text=progress_text)
                         assert all([kelas, mapel, topik, style, style_details, waktu, pertemuan]), "All variables must be filled"
-                        roadmap = agent_1(llm_client, kelas=kelas, mapel=mapel, topik=topik, topik_details="None", style=style,
-                                          style_details=style_details, waktu=waktu, pertemuan=pertemuan, llm_params=llm_params, messages=[])
+                        roadmap = agent_teacher(llm_client, kelas=kelas, mapel=mapel, topik=topik, topik_details="None", style=style,
+                                          style_details=style_details, waktu=waktu, pertemuan=pertemuan, llm_params=llm_params)
                         st.session_state.roadmap_text = roadmap
 
                         progress_text = "Finished!"
@@ -654,8 +736,8 @@ def roadmap_fragment():
                         progress_bar.progress(start, text=progress_text)
 
                         assert all([kelas, mapel, topik, style, style_details, waktu, pertemuan, st.session_state.topik_details]), "All variables must be filled"
-                        roadmap = agent_1(llm_client, kelas=kelas, mapel=mapel, topik=topik, topik_details=st.session_state.topik_details, style=style,
-                                          style_details=style_details, waktu=waktu, pertemuan=pertemuan, llm_params=llm_params, messages=[])
+                        roadmap = agent_teacher(llm_client, kelas=kelas, mapel=mapel, topik=topik, topik_details=st.session_state.topik_details, style=style,
+                                          style_details=style_details, waktu=waktu, pertemuan=pertemuan, llm_params=llm_params)
                         st.session_state.roadmap_text = roadmap
 
                         progress_text = "Finished!"
