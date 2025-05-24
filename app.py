@@ -66,7 +66,7 @@ def agent_teacher(_client, kelas: str, mapel: str, topik: str, topik_details:str
     - **Mata Pelajaran** (Subject being taught):
         {mapel}
 
-    - **Topik Pembelajaran** (Specific topic within the subject):
+    - **Topik Plajaran** (Specific topic within the subject):
         {topik}
 
     - **Topik Details** (Details of the topic):
@@ -374,7 +374,6 @@ def topik_toggle_update_callback():
 def topik_update_callback():
     if st.session_state.topik_toggle_update_state:
         splitted_text = len(st.session_state.topik_textarea_update.strip().split("<SEP>"))
-        logging.info(splitted_text)
         if splitted_text != 2:
             st.session_state.topik_update = None
             st.session_state.topik_textarea_update = None
@@ -526,7 +525,6 @@ def roadmap_fragment():
                         start += 25
                         progress_bar.progress(start, text=progress_text)
                         verify_results = agent_verificator(llm_client, mapel=mapel, topik=topik, topik_details=topik_details)
-                        logging.info(verify_results)
 
                         if "<generation_error_type_1>" in verify_results:
                             st.session_state.lock = False
