@@ -56,7 +56,7 @@ def agent_teacher(_client, kelas: str, mapel: str, topik: str, topik_details:str
     agent_prompt = f"""
 Anda adalah seorang guru senior yang sangat berpengalaman dan berspesialisasi dalam merancang strategi pengajaran yang efektif dan menarik bagi siswa di Indonesia.
 Tugas Anda adalah membantu para guru di Indonesia dengan menyusun **peta jalan pengajaran (teaching roadmap) yang komprehensif**.
-Peta jalan ini harus membantu guru menyampaikan topik secara efisien dan memungkinkan siswa memahami materi secara menyeluruh.
+Peta jalan ini harus membantu guru menyampaikan topik secara efisien dan memungkinkan siswa memahami materi secara menyeluruh. Anda harus memastikan semua bagian dari format output yang diminta terisi dengan baik.
 
 **Input yang Akan Anda Terima:**
 
@@ -66,63 +66,74 @@ Peta jalan ini harus membantu guru menyampaikan topik secara efisien dan memungk
     {mapel}
 - **Topik Pembelajaran** (Topik spesifik dalam mata pelajaran):
     {topik}
-- **Topik Details** (Detail dari topik (opsional)):
+- **Topik Details** (Detail tambahan atau sub-topik dari topik utama, jika ada. Bersifat opsional):
     {topik_details}
-- **Gaya Belajar** (Gaya Belajar siswa):
+- **Gaya Belajar** (Preferensi gaya belajar umum siswa, contoh: Visual, Auditori, Kinestetik, Campuran):
     {style}
-- **Gaya Belajar Details** (Detail gaya belajar (opsional)):
+- **Gaya Belajar Details** (Detail lebih lanjut mengenai preferensi atau kebutuhan gaya belajar siswa, jika ada. Bersifat opsional):
     {style_details}
-- **Waktu Belajar** (Total waktu pengajaran yang tersedia dalam satu hari):
+- **Waktu Belajar** (Total waktu pengajaran yang tersedia dalam satu hari, misal "2 jam pelajaran" atau "90 menit"):
     {waktu}
-- **Pertemuan** (Jumlah hari pertemuan):
+- **Pertemuan** (Jumlah hari atau sesi pertemuan yang dialokasikan untuk topik ini):
     {pertemuan}
 
 **Pembuatan Rencana Pengajaran**
-    
-Berdasarkan **input** yang telah diberikan, hasilkan roadmap dalam **Bahasa Indonesia** dengan struktur berikut:
+
+Berdasarkan **input** yang telah diberikan, hasilkan roadmap dalam **Bahasa Indonesia** dengan struktur dan format yang ditentukan di bawah ini secara cermat dan INGAT Konten roadmap harus sesuai dengan informasi pada **input**.
+Jika `Topik Details` diberikan, gunakan untuk memperkaya bagian `Topik Pelajaran` atau rincian dalam `Road Map Pengajaran`.
+Jika `Gaya Belajar Details` diberikan, gunakan untuk memperkaya bagian `Gaya Pengajaran` atau saran dalam `Saran Media & Alat Bantu`.
 
 ### Format Output (Tulis dalam Bahasa Indonesia):
 
 ```
 **Kriteria Pengajaran**
-<one_space>
-- Kelas           : ...
-- Mata Pelajaran  : ...
-- Topik Pelajaran : ...
-- Gaya Pengajaran : ...
-- Waktu Belajar   : ...
-- Pertemuan       : ...
-<one_space>
+
+- Kelas           : {kelas}
+- Mata Pelajaran  : {mapel}
+- Topik Pelajaran : {topik} 
+- Gaya Pengajaran : {style} 
+- Waktu Belajar   : {waktu} per pertemuan
+- Pertemuan       : {pertemuan} kali pertemuan
+
 **Objektif Capaian**
-<one_space>
-(Tuliskan minimal 5 tujuan pembelajaran yang jelas, spesifik, dan terukur.)
-<one_space>
+
+(Tuliskan minimal 5 tujuan pembelajaran yang jelas, spesifik, terukur, dapat dicapai, relevan, dan berbatas waktu (SMART) untuk topik ini.)
+
 **Road Map Pengajaran**
-<one_space>
-(Rincikan langkah-langkah pengajaran yang disesuaikan dengan konteks dari inputs yang diberikan, terdiri dari beberapa pertemuan jika perlu. Setiap pertemuan minimal 5 poin langkah atau aktivitas.)
-<one_space>
+
+(Rincikan rencana pengajaran langkah demi langkah, dibagi per pertemuan jika `Pertemuan` > 1. Setiap pertemuan harus mencakup minimal 5 poin langkah atau aktivitas inti. Sesuaikan metodologi dan aktivitas dengan `Gaya Pengajaran` yang telah ditentukan. Jabarkan durasi estimasi untuk setiap blok aktivitas utama dalam pertemuan.)
+
+*Contoh untuk satu pertemuan:*
+* **Pertemuan 1: [Judul/Fokus Pertemuan 1] (Estimasi Durasi: {waktu})**
+    (Aktivitas yang disesuaikan berdasarkan Topik Pelajaran dan Gaya Pengajaran)
+
 **Aktivitas Refleksi**
-<one_space>
-(Berikan ide aktivitas untuk membantu siswa merefleksikan apa yang mereka pelajari, misalnya: jurnal belajar, diskusi kelompok, exit ticket, dll.)
-<one_space>
+
+(Berikan 2-3 ide aktivitas konkret untuk membantu siswa merefleksikan apa yang telah mereka pelajari. Contoh: membuat jurnal belajar mingguan, diskusi kelompok terfokus pada "apa yang paling menarik/menantang", membuat peta konsep, atau menggunakan "exit ticket" dengan pertanyaan reflektif.)
+
 **Penilaian Formatif**
-<one_space>
-(Sertakan metode evaluasi selama proses belajar, seperti kuis singkat, observasi, pertanyaan terbuka, lembar kerja, dll.)
-<one_space>
+
+(Sertakan 2-3 metode penilaian formatif yang relevan dan dapat diimplementasikan selama proses pembelajaran untuk memantau pemahaman siswa. Contoh: kuis singkat di akhir pertemuan, observasi partisipasi siswa dalam diskusi, penilaian presentasi kelompok kecil, pemeriksaan lembar kerja/latihan singkat, pertanyaan lisan acak.)
+
 **Ide Kuis / Tes Singkat**
-<one_space>
-(Tampilkan 3–5 contoh pertanyaan kuis yang bisa digunakan guru untuk mengukur pemahaman siswa.)
-<one_space>
+
+(Sajikan 3–5 contoh pertanyaan kuis atau tes singkat yang relevan dengan `Topik Pembelajaran` dan `Objektif Capaian`. Variasikan jenis pertanyaan jika memungkinkan, misalnya pilihan ganda, esai singkat, benar/salah dengan justifikasi.)
+1.  ...
+2.  ...
+3.  ...
+4.  ... (opsional)
+5.  ... (opsional)
+
 **Saran Media & Alat Bantu**
-<one_space>
-(Rekomendasikan media pembelajaran atau alat bantu yang sesuai dengan gaya belajar siswa yang telah diberikan pada inputs.)
-<one_space>
+
+(Rekomendasikan 2-4 media pembelajaran atau alat bantu spesifik yang sesuai dengan `Topik Pembelajaran` dan mendukung `Gaya Belajar` siswa yang telah diidentifikasi. Berikan alasan singkat mengapa media/alat tersebut direkomendasikan. Contoh: video animasi penjelasan untuk gaya visual, podcast atau diskusi rekaman untuk gaya auditori, model tiga dimensi atau kit praktikum untuk gaya kinestetik.)
+
 **Catatan Tambahan untuk Guru**
-<one_space>
-(Berikan tips tambahan atau hal-hal yang perlu diantisipasi saat mengajar topik ini.)
+
+(Berikan 2-3 tips praktis, pengingat penting, atau hal-hal yang perlu diantisipasi oleh guru saat mengajar topik ini. Ini bisa berupa strategi manajemen kelas, cara mengatasi miskonsepsi umum siswa, atau ide diferensiasi untuk siswa dengan kebutuhan beragam.)
 ```
-Gunakan bahasa Indonesia yang jelas, alami, dan mudah dipahami oleh guru. Tulis seolah-olah Anda sedang membimbing guru baru untuk mengajar dengan percaya diri dan efektif.
-    """
+Gunakan bahasa Indonesia yang jelas, alami, dan mudah dipahami oleh guru. Tulis seolah-olah Anda sedang membimbing guru baru untuk mengajar dengan percaya diri dan efektif. Pastikan seluruh bagian dari format output di atas telah Anda isi dengan lengkap dan relevan.
+"""
     messages = [{"role": "user", "content": agent_prompt}]
     
 
@@ -202,102 +213,93 @@ Pastikan Anda secara ketat mengikuti semua instruksi di atas.
 
 def agent_verificator(_client, mapel:str, topik: str, topik_details: str):
     agent_prompt = f"""
-**Persona & Tujuan Utama:**
-Anda adalah verifikator yang kompeten dan sangat teliti dalam melakukan proses verifikasi. Sebagai konteks, Anda bekerja dengan Agent Guru 1 & Guru 2 yang mana mempunyai tugas untuk membuat suatu personalisasi rancangan pembelajaran yang komprehensif berdasarkan **input** yang diberikan.
-Tugas Anda disini adalah membantu kedua agen, yaitu Guru 1 & Guru 2 untuk melakukan verifikasi secara mendalam terlebih dahulu terhadap konten dari topik, detail topik, dan mata pelajaran. Hal ini bertujuan untuk memastikan konten ketiganya valid, selaras, sesuai, dan tidak saling bertabrakan.
-Berikut adalah langkah-langkah yang wajib Anda ikuti dan patuhi:
+Anda adalah **Verifikator AI** yang diprogram untuk memiliki tingkat ketelitian sangat tinggi dan bekerja secara sistematis. Misi utama Anda adalah mendukung **Agen Guru 1** dan **Agen Guru 2** dalam penyusunan rancangan pembelajaran yang dipersonalisasi. Sebelum Agen Guru dapat melanjutkan, Anda **WAJIB** melakukan verifikasi komprehensif terhadap input yang diberikan.
 
-**Input yang akan Anda terima**
+Tugas Anda adalah memvalidasi secara mendalam `mapel` (mata pelajaran), `topik`, dan `topik_details`. Verifikasi ini bertujuan untuk memastikan bahwa setiap komponen input (1) valid secara individual, (2) selaras satu sama lain, dan (3) tidak mengandung informasi yang kontradiktif atau tidak relevan.
 
-1. `mapel` merupakan mata pelajaran yang akan diajarkan, seperti: IPA, IPS, Matematika, dan lainnya:
+**Instruksi Operasional Wajib:**
+Anda **HARUS** mengikuti langkah-langkah verifikasi di bawah ini secara **BERURUTAN dan KETAT**. Jangan melanjutkan ke langkah berikutnya jika kondisi kegagalan pada langkah saat ini terpenuhi. Output Anda **HARUS HANYA** berupa salah satu dari tiga kemungkinan string yang telah ditentukan: dua untuk kondisi error, dan satu untuk kondisi sukses.
+
+**Input yang Akan Anda Terima:**
+
+1.  `mapel`: Sebuah string yang merepresentasikan mata pelajaran yang akan diajarkan (contoh: "IPA", "IPS", "Matematika").
     ```
     {mapel}
     ```
-2. `topik` merupakan topik pembahasan dari mata pelajaran yang akan diajarkan:
+2.  `topik`: Sebuah string yang merepresentasikan topik utama pembahasan dari mata pelajaran tersebut.
     ```
     {topik}
     ```
-3. `topik_details` merupakan penjelasan yang lebih lengkap terkait dengan topik pembahasaan, seperti: sub-sub bab dari topik pembahasan:
+3.  `topik_details`: Sebuah string yang berisi penjelasan lebih rinci dan komprehensif mengenai `topik`, seringkali mencakup deskripsi bab dan sub-bab.
     ```
     {topik_details}
     ```
 
-**Langkah 1: Verifikasi isi konten dari `topik`, dan `topik_details`**
-* **Kriteria Validasi**:
-    2. **Kecukupan Konten**: Apakah `topik`, dan `topik_details` telah diisi (bukan string kosong atau hanya spasi)? 
-    1. **Dapat Dipahami:** Apakah `topik`, dan `topik_details` merupakan kalimat yang jelas, logis, dan dapat dimengerti oleh manusia?
-* **JIKA SALAH SATU **Kriteria Validasi** TIDAK MEMENUHI, ANDA DILARANG UNTUK MELANJUTKAN KE TAHAPAN SELANJUTNYA:
-    * **Output Anda HARUS HANYA berupa pesan informasi berikut dalam Bahasa Indonesia seperti berikut:**
+---
+**PROSES VERIFIKASI**
+---
+
+**Langkah 1: Validasi Kelengkapan dan Keterbacaan Konten `topik` dan `topik_details`**
+
+* **Kriteria Validasi Individual:**
+    1.  **Kecukupan Konten**:
+        * Apakah `topik` **BUKAN** string kosong atau hanya terdiri dari spasi?
+        * Apakah `topik_details` **BUKAN** string kosong atau hanya terdiri dari spasi?
+    2.  **Keterbacaan dan Logika**:
+        * Apakah `topik` merupakan frasa atau kalimat yang jelas, logis, dan dapat dimengerti secara umum?
+        * Apakah `topik_details` merupakan teks yang tersusun secara jelas, logis, dan dapat dimengerti secara umum?
+
+* **Kondisi Gagal Langkah 1**:
+    * **JIKA** `topik` **ATAU** `topik_details` gagal memenuhi **SALAH SATU** dari **Kriteria Validasi Individual** di atas:
+    * **Output Anda HARUS HANYA berupa string pesan berikut dalam Bahasa Indonesia (JANGAN TAMBAHKAN APAPUN SELAIN STRING INI):**
         ```
-        <generation_error_type_1>Mohon pastikan topik dan detail topik sudah lengkap dan menggunakan kalimat yang runtut dan mudah dipahami. Silakan perbaiki dan isi kembali.</generation_error_type_1>
+        <generation_error_type_1>Mohon pastikan topik dan detail topik sudah lengkap dan menggunakan kalimat yang runtut dan mudah dipahami. Silakan perbaiki dan isi kembali.<generation_error_type_1>
         ```
+    * **SEGERA HENTIKAN PROSES VERIFIKASI DI SINI.**
 
-**Langkah 2: Verifikasi keselarasan isi konten dari `mapel`, `topik`, dan `topik_details`**
-* **Kriteria Validasi**:
-    1. **Keselaraan Konten `topik` dengan `mapel`**
-        Apakah konten dari `mapel` dan `topik` sudah selaras yang mana `topik` harus mengacu kepada pembasan yang valid dari ruang lingkup ilmu pengetahuan {mapel}
-        Sebagai contoh:
+---
+
+**Langkah 2: Validasi Keselarasan Antar Konten (`mapel`, `topik`, dan `topik_details`)**
+*(Lanjutkan ke langkah ini HANYA JIKA Langkah 1 berhasil dilewati tanpa error)*
+
+* **Kriteria Validasi Keselarasan**:
+    1.  **Keselarasan `topik` dengan `mapel`**:
+        * Apakah `topik` yang diberikan merupakan pembahasan yang valid, relevan, dan secara umum diakui sebagai bagian dari ruang lingkup ilmu pengetahuan untuk `{mapel}`?
+        * *Contoh TIDAK VALID*:
+            `mapel`: "IPA"
+            `topik`: "Sistem Persamaan Linear 2 Variabel"
+            *(Alasan: "Sistem Persamaan Linear 2 Variabel" adalah materi Matematika, bukan IPA).*
+        * *Contoh VALID*:
+            `mapel`: "IPA"
+            `topik`: "Getaran, Gelombang dan Cahaya"
+    2.  **Keselarasan `topik_details` dengan `topik`**:
+        * Apakah `topik_details` secara akurat, relevan, dan komprehensif menjelaskan, menguraikan, atau memberikan detail lebih lanjut untuk `topik` yang diberikan? Apakah `topik_details` fokus pada penjabaran `topik` dan tidak menyimpang ke konsep lain yang tidak terkait langsung?
+        * *Contoh TIDAK VALID*:
+            `topik`: "Sistem Persamaan Linear 2 Variabel"
+            `topik_details`: "Mempelajari fenomena fisika terkait getaran, karakteristik dan jenis gelombang, serta sifat-sifat cahaya dan aplikasinya dalam alat optik. Sub-bab: Getaran, Gelombang, Cahaya dan Alat Optik."
+            *(Alasan: `topik_details` membahas materi IPA, bukan Matematika tentang SPLDV).*
+        * *Contoh VALID*:
+            `topik`: "Sistem Persamaan Linear 2 Variabel"
+            `topik_details`: "Deskripsi Bab: Memperkenalkan konsep sistem persamaan linear dengan dua variabel (SPLDV) dan metode penyelesaiannya, serta aplikasinya. Sub-bab: Sistem persamaan linear variabel (Definisi, model matematika, metode penyelesaian: grafik, substitusi, eliminasi), Aplikasi sistem persamaan linear 2 variabel (Penerapan SPLDV dalam soal cerita dan masalah sehari-hari)."
+
+* **Kondisi Gagal Langkah 2**:
+    * **JIKA SALAH SATU** dari **Kriteria Validasi Keselarasan** di atas **TIDAK TERPENUHI**:
+    * **Output Anda HARUS HANYA berupa string pesan berikut dalam Bahasa Indonesia (JANGAN TAMBAHKAN APAPUN SELAIN STRING INI):**
         ```
-        CONTOH PERTAMA:
-
-            `mapel`: IPA
-            `topik`: Sistem Persamaan Linear 2 Variabel
-
-            KESIMPULAN: TIDAK VALID karena "Sistem Persamaan Linear 2 Variabel" dibahas dalam mata pelajaran Matematika bukan IPA
-
-        CONTOH KEDUA:
-
-            `mapel`: IPS
-            `topik`: Sistem Persamaan Linear 2 Variabel
-
-            KESIMPULAN: TIDAK VALID karena "Sistem Persamaan Linear 2 Variabel" dibahas dalam mata pelajaran Matematika bukan IPS
-
-        CONTOH KETIGA:
-
-            `mapel`: IPA
-            `topik`: Getaran, Gelombang dan Cahaya
-
-            KESIMPULAN: VALID karena "Getaran, Gelombang dan Cahaya" dibahas dalam mata pelajaran IPA
+        <generation_error_type_2>Mohon pastikan mata pelajaran, topik dan detail topik sudah selaras dan menggunakan kalimat yang runtut dan mudah dipahami. Silakan perbaiki dan isi kembali.<generation_error_type_2>
         ```
+    * **SEGERA HENTIKAN PROSES VERIFIKASI DI SINI.**
 
-    2. **Keselaraan Konten `topik` dengan `topik_details`**
-        Apakah konten dari `topik` dan `topik_details` sudah selaras yang mana `topik_details` harus sesusai terhadap pembasan yang valid dari {topik}
-        Sebagai contoh:
-        ```
-        CONTOH PERTAMA:
+---
 
-            `topik`: Sistem Persamaan Linear 2 Variabel
-            `topik_details`: 
-                Mempelajari fenomena fisika terkait getaran, karakteristik dan jenis gelombang, serta sifat-sifat cahaya dan aplikasinya dalam alat optik.
-                Sub-bab:
-                    Getaran
-                        Deskripsi: Mendefinisikan getaran sebagai gerakan periodik bolak-balik dan besaran-besaran terkait (amplitudo, frekuensi, periode).
-                    Gelombang
-                        Deskripsi: Menjelaskan konsep gelombang sebagai rambatan getaran, jenis-jenisnya, sifat-sifat, dan besaran-besaran gelombang.
-                    Cahaya dan Alat Optik
-                        Deskripsi: Menguraikan sifat-sifat cahaya, pembentukan bayangan oleh cermin dan lensa, serta prinsip kerja alat-alat optik.
+**Langkah 3: Output Jika Semua Tahap Verifikasi Berhasil**
+*(Lanjutkan ke langkah ini HANYA JIKA Langkah 1 DAN Langkah 2 berhasil dilewati tanpa error)*
 
-
-            KESIMPULAN: TIDAK VALID karena `topik_details` tidak membahas dan menjelaskan lebih lanjut terkait dengan `topik` yang diberikan.
-
-        CONTOH KEDUA:
-
-            `topik`: Sistem Persamaan Linear 2 Variabel
-            `topik_details`: 
-                Deskripsi Bab: Memperkenalkan konsep sistem persamaan linear dengan dua variabel (SPLDV) dan metode penyelesaiannya, serta aplikasinya.
-                Sub-bab:
-                    Sistem persamaan linear variabel
-                        Deskripsi: Mendefinisikan sistem persamaan linear dua variabel, cara membuat model matematika dari situasi nyata, dan metode penyelesaian (grafik, substitusi, eliminasi).
-                    Aplikasi sistem persamaan linear 2 variabel
-                        Deskripsi: Menerapkan SPLDV untuk menyelesaikan berbagai soal cerita dan masalah dalam kehidupan sehari-hari.
-
-            KESIMPULAN: VALID karena membahas dan menjelaskan lebih lanjut terkait dengan `topik` yang diberikan.
-        ```
-* **JIKA SALAH SATU **Kriteria Validasi** TIDAK MEMENUHI:
-    * **Output Anda HARUS HANYA berupa pesan informasi berikut dalam Bahasa Indonesia seperti berikut:**
-        ```
-        <generation_error_type_2>Mohon pastikan mata pelajaran, topik dan detail topik sudah selaras dan menggunakan kalimat yang runtut dan mudah dipahami. Silakan perbaiki dan isi kembali.</generation_error_type_2>
-        ```
+* **JIKA SEMUA** kriteria dari Langkah 1 dan Langkah 2 telah terpenuhi:
+* **Output Anda HARUS HANYA berupa string pesan berikut dalam Bahasa Indonesia (JANGAN TAMBAHKAN APAPUN SELAIN STRING INI):**
+    ```
+    <validation_success>Semua input valid dan selaras.</validation_success>
+    ```
 """
     messages = [{"role": "user", "content": agent_prompt}]
     response = _client.chat.completions.create(model=llm_params["model"], max_tokens=1024,
@@ -528,16 +530,16 @@ def roadmap_fragment():
                         time.sleep(1)
                         progress_text = "Verifying Inputs..."
                         start += 25
-                        verify_results = agent_verificator(llm_client, mapel=mapel, topik=topik, topik_details=topik_details)
-                        st.session_state.verification = verify_results
                         progress_bar.progress(start, text=progress_text)
+                        verify_results = agent_verificator(llm_client, mapel=mapel, topik=topik, topik_details=topik_details)
+                        logging.info(verify_results)
 
                         if "<generation_error_type_1>" in verify_results:
                             st.session_state.lock = False
                             st.session_state.gen = False
                             st.session_state.generate_roadmap = False
                             st.session_state.gen_roadmap = False
-                            st.error(st.session_state.verification, icon="🚨")
+                            st.session_state.verification = verify_results.split("<generation_error_type_1>")[1]
                             st.rerun()
 
                         elif "<generation_error_type_2>" in verify_results:
@@ -545,7 +547,7 @@ def roadmap_fragment():
                             st.session_state.gen = False
                             st.session_state.generate_roadmap = False
                             st.session_state.gen_roadmap = False
-                            st.error(st.session_state.verification, icon="🚨")
+                            st.session_state.verification = verify_results.split("<generation_error_type_2>")[1]
                             st.rerun()
                         
                         else:
@@ -623,7 +625,7 @@ def roadmap_fragment():
                         cols[0].button("Save", use_container_width=True, key="save_button", on_click=save_callback)
                         cols[1].button("Regenerate", use_container_width=True, key="rev_button", on_click=rev_callback)
             else:
-                st.error(st.session_state.roadmap_text, icon="🚨")
+                st.error(st.session_state.verification, icon="🚨")
 
         elif st.session_state.state_gen == "second":
             if st.session_state.gen_roadmap:
