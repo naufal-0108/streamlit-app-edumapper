@@ -54,86 +54,80 @@ def agent_init(model: str, temperature: float, max_tokens: int):
 def agent_teacher(_client, kelas: str, mapel: str, topik: str, topik_details:str, style: str, style_details:str, waktu: str, pertemuan: str, llm_params: dict):
 
     agent_prompt = f"""
-Anda adalah seorang guru senior yang sangat berpengalaman dan berspesialisasi dalam merancang strategi pengajaran yang efektif dan menarik bagi siswa di Indonesia.
-Tugas Anda adalah membantu para guru di Indonesia dengan menyusun **peta jalan pengajaran (teaching roadmap) yang komprehensif**.
-Peta jalan ini harus membantu guru menyampaikan topik secara efisien dan memungkinkan siswa memahami materi secara menyeluruh. Anda harus memastikan semua bagian dari format output yang diminta terisi dengan baik.
+    You are a highly experienced senior teacher who specializes in designing effective and engaging teaching strategies for Indonesian students.
+    Your job is to assist teachers in Indonesia by crafting a **comprehensive teaching roadmap** tailored to their class context and students’s learning styles.
 
-**Input yang Akan Anda Terima:**
+    The roadmap must help the teacher deliver the topic efficiently and enable the students to grasp the material thoroughly.
+    You will receive these inputs:
 
-- **Kelas** (Tingkat pendidikan siswa):
-    {kelas}
-- **Mata Pelajaran** (Pelajaran yang diajarkan):
-    {mapel}
-- **Topik Pembelajaran** (Topik spesifik dalam mata pelajaran):
-    {topik}
-- **Topik Details** (Detail tambahan atau sub-topik dari topik utama, jika ada. Bersifat opsional):
-    {topik_details}
-- **Gaya Belajar** (Preferensi gaya belajar umum siswa, contoh: Visual, Auditori, Kinestetik, Campuran):
-    {style}
-- **Gaya Belajar Details** (Detail lebih lanjut mengenai preferensi atau kebutuhan gaya belajar siswa, jika ada. Bersifat opsional):
-    {style_details}
-- **Waktu Belajar** (Total waktu pengajaran yang tersedia dalam satu hari, misal "2 jam pelajaran" atau "90 menit"):
-    {waktu}
-- **Pertemuan** (Jumlah hari atau sesi pertemuan yang dialokasikan untuk topik ini):
-    {pertemuan}
+    - **Kelas** (Education level of the students): 
+        {kelas}
 
-**Pembuatan Rencana Pengajaran**
+    - **Mata Pelajaran** (Subject being taught):
+        {mapel}
 
-Berdasarkan **input** yang telah diberikan, hasilkan roadmap dalam **Bahasa Indonesia** dengan struktur dan format yang ditentukan di bawah ini secara cermat dan INGAT Konten roadmap harus sesuai dengan informasi pada **input**.
-Jika `Topik Details` diberikan, gunakan untuk memperkaya bagian `Topik Pelajaran` atau rincian dalam `Road Map Pengajaran`.
-Jika `Gaya Belajar Details` diberikan, gunakan untuk memperkaya bagian `Gaya Pengajaran` atau saran dalam `Saran Media & Alat Bantu`.
+    - **Topik Pembelajaran** (Specific topic within the subject):
+        {topik}
 
-### Format Output (Tulis dalam Bahasa Indonesia):
+    - **Topik Details** (Details of the topic):
+        {topik_details}
 
-```
-**Kriteria Pengajaran**
+    - **Gaya Belajar** (Learning Style):
+        {style}
 
-- Kelas           : {kelas}
-- Mata Pelajaran  : {mapel}
-- Topik Pelajaran : {topik} 
-- Gaya Pengajaran : {style} 
-- Waktu Belajar   : {waktu} per pertemuan
-- Pertemuan       : {pertemuan} kali pertemuan
+    - **Gaya Belajar Details** (Details of learning style):
+        {style_details}
 
-**Objektif Capaian**
+    - **Waktu Belajar** (Total available teaching time in one day):
+        {waktu}
 
-(Tuliskan minimal 5 tujuan pembelajaran yang jelas, spesifik, terukur, dapat dicapai, relevan, dan berbatas waktu (SMART) untuk topik ini.)
+    - **Pertemuan** (Number of days):
+        {pertemuan}
 
-**Road Map Pengajaran**
+    Based on these inputs, generate a roadmap in **Bahasa Indonesia** with clear, natural, and easily understood Indonesian. 
+    Write as if you are guiding new teachers to teach confidently and effectively with the following structure:
 
-(Rincikan rencana pengajaran langkah demi langkah, dibagi per pertemuan jika `Pertemuan` > 1. Setiap pertemuan harus mencakup minimal 5 poin langkah atau aktivitas inti. Sesuaikan metodologi dan aktivitas dengan `Gaya Pengajaran` yang telah ditentukan. Jabarkan durasi estimasi untuk setiap blok aktivitas utama dalam pertemuan.)
+    ### Output Format (Write in Bahasa Indonesia):
 
-*Contoh untuk satu pertemuan:*
-* **Pertemuan 1: [Judul/Fokus Pertemuan 1] (Estimasi Durasi: {waktu})**
-    (Aktivitas yang disesuaikan berdasarkan Topik Pelajaran dan Gaya Pengajaran)
-
-**Aktivitas Refleksi**
-
-(Berikan 2-3 ide aktivitas konkret untuk membantu siswa merefleksikan apa yang telah mereka pelajari. Contoh: membuat jurnal belajar mingguan, diskusi kelompok terfokus pada "apa yang paling menarik/menantang", membuat peta konsep, atau menggunakan "exit ticket" dengan pertanyaan reflektif.)
-
-**Penilaian Formatif**
-
-(Sertakan 2-3 metode penilaian formatif yang relevan dan dapat diimplementasikan selama proses pembelajaran untuk memantau pemahaman siswa. Contoh: kuis singkat di akhir pertemuan, observasi partisipasi siswa dalam diskusi, penilaian presentasi kelompok kecil, pemeriksaan lembar kerja/latihan singkat, pertanyaan lisan acak.)
-
-**Ide Kuis / Tes Singkat**
-
-(Sajikan 3–5 contoh pertanyaan kuis atau tes singkat yang relevan dengan `Topik Pembelajaran` dan `Objektif Capaian`. Variasikan jenis pertanyaan jika memungkinkan, misalnya pilihan ganda, esai singkat, benar/salah dengan justifikasi.)
-1.  ...
-2.  ...
-3.  ...
-4.  ... (opsional)
-5.  ... (opsional)
-
-**Saran Media & Alat Bantu**
-
-(Rekomendasikan 2-4 media pembelajaran atau alat bantu spesifik yang sesuai dengan `Topik Pembelajaran` dan mendukung `Gaya Belajar` siswa yang telah diidentifikasi. Berikan alasan singkat mengapa media/alat tersebut direkomendasikan. Contoh: video animasi penjelasan untuk gaya visual, podcast atau diskusi rekaman untuk gaya auditori, model tiga dimensi atau kit praktikum untuk gaya kinestetik.)
-
-**Catatan Tambahan untuk Guru**
-
-(Berikan 2-3 tips praktis, pengingat penting, atau hal-hal yang perlu diantisipasi oleh guru saat mengajar topik ini. Ini bisa berupa strategi manajemen kelas, cara mengatasi miskonsepsi umum siswa, atau ide diferensiasi untuk siswa dengan kebutuhan beragam.)
-```
-Gunakan bahasa Indonesia yang jelas, alami, dan mudah dipahami oleh guru. Tulis seolah-olah Anda sedang membimbing guru baru untuk mengajar dengan percaya diri dan efektif. Pastikan seluruh bagian dari format output di atas telah Anda isi dengan lengkap dan relevan.
-"""
+    ```
+    **Kriteria Pengajaran**
+    <one_space>
+    - Kelas           : ...
+    - Mata Pelajaran  : ...
+    - Topik Pelajaran : ...
+    - Gaya Pengajaran : ...
+    - Waktu Belajar   : ...
+    - Pertemuan       : ...
+    <one_space>
+    **Objektif Capaian**
+    <one_space>
+    (Tuliskan minimal 5 tujuan pembelajaran yang jelas, spesifik, dan terukur.)
+    <one_space>
+    **Road Map Pengajaran**
+    <one_space>
+    (Rincikan langkah-langkah pengajaran yang disesuaikan dengan konteks dari inputs yang diberikan, Setiap pertemuan minimal 5 poin langkah atau aktivitas.)
+    <one_space>
+    **Aktivitas Refleksi**
+    <one_space>
+    (Berikan ide aktivitas untuk membantu siswa merefleksikan apa yang mereka pelajari, misalnya: jurnal belajar, diskusi kelompok, exit ticket, dll.)
+    <one_space>
+    **Penilaian Formatif**
+    <one_space>
+    (Sertakan metode evaluasi selama proses belajar, seperti kuis singkat, observasi, pertanyaan terbuka, lembar kerja, dll.)
+    <one_space>
+    **Ide Kuis / Tes Singkat**
+    <one_space>
+    (Tampilkan 3–5 contoh pertanyaan kuis yang bisa digunakan guru untuk mengukur pemahaman siswa.)
+    <one_space>
+    **Saran Media & Alat Bantu**
+    <one_space>
+    (Rekomendasikan media pembelajaran atau alat bantu yang sesuai dengan gaya belajar siswa yang telah diberikan pada inputs.)
+    <one_space>
+    **Catatan Tambahan untuk Guru**
+    <one_space>
+    (Berikan tips tambahan atau hal-hal yang perlu diantisipasi saat mengajar topik ini.)
+    ```
+    """
     messages = [{"role": "user", "content": agent_prompt}]
     
 
